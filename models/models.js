@@ -2,7 +2,7 @@ var path = require('path');
 
 // Postfress DATABASE_URL = postgres://user:passwd@host:port/database
 // SQLite DATABASE_URL = sqlite://:@:/
-var url = process.env.DATABASE_URL.match(/(.*)\:\/\/(.*?)\:(.*)@(.*)\/(.*)/);
+var url = process.env.DATABASE_URL.match(/(.*)\:\/\/(.*?)\:(.*)@(.*)\:(.*)\/(.*)/);
 var DB_name		= (url[6] || null);
 var user		= (url[2] || null);
 var pwd 		= (url[3] || null);
@@ -28,19 +28,20 @@ var sequelize = new Sequelize(DB_name, user, pwd,
 );
 
 //importar definición de la tabla Quiz en quiz.js
-var Quiz = sequelize.import(path.join(__dirname, 'quiz'));
+var quiz_path = path.join(__dirname, 'quiz');
+var Quiz = sequelize.import(quiz_path);
 
 exports.Quiz = Quiz; //exportar definición de la tabla Quiz
 
 //sequelize.sync() crea e inicializa tabla de preguntas en DB
-sequelize.sync().success(function(){
+sequelize.sync().then(function(){
 	//sucess(..) ejecuta el manejador una vez creada la tabla
-	Quiz.count().success(function(count){
+	Quiz.count().then(function(count){
 		if(count === 0){
 			Quiz.create({	pregunta: 'Capital de Italia',
 							respuesta: 'Roma'
 						})
-			.success(function(){console.log('Base de datos inicializada')});
+			.then(function(){console.log('Base de datos inicializada')});
 		};
 	});
 });
